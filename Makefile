@@ -46,7 +46,11 @@ SRCS      += stm32f4xx_hal_cortex.c
 SRCS      += stm32f4xx_hal_gpio.c
 
 CUBE_URL   = http://www.st.com/st-web-ui/static/active/en/st_prod_software_internet/resource/technical/software/firmware/stm32cubef3.zip
+ifeq ($(OS),Windows_NT)
 CUBE_DIR   = D:/polaris_mustafa/ic_dokumanlar/st/STM32Cube_FW_F4_V1.4.0
+else
+CUBE_DIR   = /home/mustafa/projects/st/STM32Cube_FW_F4_V1.4.0
+endif
 
 BSP_DIR    = $(CUBE_DIR)/Drivers/BSP/$(BOARD)
 HAL_DIR    = $(CUBE_DIR)/Drivers/STM32F4xx_HAL_Driver
@@ -78,7 +82,7 @@ OCD        = openocd
 DEFS       = -D $(MCU_MC)
 
 # Include search paths (-I)
-INCS       = -I src
+INCS       = -I Src
 INCS      += -I Inc
 INCS      += -I $(BSP_DIR)
 INCS      += -I $(CMSIS_DIR)/Include
@@ -99,7 +103,7 @@ CFLAGS    += $(INCS) $(DEFS)
 LDFLAGS    = -Wl,--gc-sections -Wl,-Map=$(TARGET).map $(LIBS) -T $(MCU_LS).ld
 
 # Source search paths
-VPATH      = ./src
+VPATH      = ./Src
 VPATH     += $(HAL_DIR)/Src
 VPATH     += $(DEV_DIR)/Source/
 
@@ -122,7 +126,7 @@ all: $(TARGET).elf
 -include $(DEPS)
 
 dirs: dep obj
-dep obj src:
+dep obj Src:
 	@echo "[MKDIR]   $@"
 	$Qmkdir -p $@
 
@@ -133,7 +137,7 @@ obj/%.o : %.c | dirs
 $(TARGET).elf: $(OBJS)
 	@echo "[LD]      $(TARGET).elf"	
 	@echo "startup.s 1"
-	$Q$(CC) $(CFLAGS) $(LDFLAGS) src/startup_$(MCU_LC).s $^ -o $@
+	$Q$(CC) $(CFLAGS) $(LDFLAGS) Src/startup_$(MCU_LC).s $^ -o $@
 	@echo "startup.s"
 	@echo "[OBJDUMP] $(TARGET).lst"
 	$Q$(OBJDUMP) -St $(TARGET).elf >$(TARGET).lst
@@ -150,10 +154,10 @@ debug:
 		-ex "load" $(GDBFLAGS) $(TARGET).elf
 
 
-template: src
-	cp -ri $(CUBE_DIR)/Projects/$(BOARD)/$(EXAMPLE)/Src/* src
-	cp -ri $(CUBE_DIR)/Projects/$(BOARD)/$(EXAMPLE)/Inc/* src
-	cp -i $(DEV_DIR)/Source/Templates/gcc/startup_$(MCU_LC).s src
+template: Src
+	cp -ri $(CUBE_DIR)/Projects/$(BOARD)/$(EXAMPLE)/Src/* Src
+	cp -ri $(CUBE_DIR)/Projects/$(BOARD)/$(EXAMPLE)/Inc/* Src
+	cp -i $(DEV_DIR)/Source/Templates/gcc/startup_$(MCU_LC).s Src
 	cp -i $(DEV_DIR)/Source/Templates/gcc/linker/$(MCU_LS).ld scripts/$(MCU_LS).ld
 
 clean:
