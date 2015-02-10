@@ -10,7 +10,8 @@
 TARGET     = demo
 
 # Take a look into $(CUBE_DIR)/Drivers/BSP for available BSPs
-BOARD      = STM32F4-Discovery
+Board     = STM324x9I_EVAL
+#BOARD      = STM32F4-Discovery
 #BOARD     = STM32303C_EVAL
 #BOARD     = STM32303E_EVAL
 #BOARD     = STM32373C_EVAL
@@ -29,21 +30,22 @@ EXAMPLE    = Examples/GPIO/GPIO_IOToggle
 
 # MCU family and type in various capitalizations o_O
 MCU_FAMILY = stm32f4xx
-MCU_LC     = stm32f407xx
-MCU_LS     = STM32F407VG_FLASH
-MCU_MC     = STM32F407xx
-MCU_UC     = STM32F407XX
+MCU_LC     = stm32f429xx
+MCU_LS     = D:/polaris_mustafa/ic_dokumanlar/st/STM32Cube_FW_F4_V1.4.0/Projects/STM324x9I_EVAL/stm32-gcc/STM32F429NI_FLASH
+MCU_MC     = STM32F429xx
+MCU_UC     = STM32F429XX
 
 # Your C files from the /src directory
-SRCS       = main.c stm32f4xx_hal_msp.c stm32f4xx_it.c system_stm32f4xx.c
+SRCS       = main.c 
+#SRCS      += stm32f4xx_hal_msp.c
 SRCS      += system_$(MCU_FAMILY).c
 SRCS      += stm32f4xx_it.c
 
-SRCS      += stm32f4xx_hal_rcc.c
-SRCS      += stm32f4xx_hal_rcc_ex.c
-SRCS      += stm32f4xx_hal.c
-SRCS      += stm32f4xx_hal_cortex.c
-SRCS      += stm32f4xx_hal_gpio.c
+#SRCS      += stm32f4xx_hal_rcc.c
+#SRCS      += stm32f4xx_hal_rcc_ex.c
+#SRCS      += stm32f4xx_hal.c
+#SRCS      += stm32f4xx_hal_cortex.c
+#SRCS      += stm32f4xx_hal_gpio.c
 
 CUBE_URL   = http://www.st.com/st-web-ui/static/active/en/st_prod_software_internet/resource/technical/software/firmware/stm32cubef3.zip
 ifeq ($(OS),Windows_NT)
@@ -107,6 +109,17 @@ VPATH      = ./Src
 VPATH     += $(HAL_DIR)/Src
 VPATH     += $(DEV_DIR)/Source/
 
+#SRCS      += $(HAL_DIR)/Src/%.c
+#SRCS      += $(DEV_DIR)/Source/%.c
+
+SRCS2 = $(foreach sdir,$(HAL_DIR)/Src,$(notdir  $(wildcard $(sdir)/*.c)))  # */
+#SRCS3 = $(foreach sdir,$(DEV_DIR)/Source,$(notdir  $(wildcard $(sdir)/*.c)))  # */
+SRCS     += $(SRCS2) 
+
+
+
+#$(notdir src/foo.c hacks)
+
 OBJS       = $(addprefix obj/,$(SRCS:.c=.o))
 DEPS       = $(addprefix dep/,$(SRCS:.c=.d))
 
@@ -130,7 +143,8 @@ dep obj Src:
 	@echo "[MKDIR]   $@"
 	$Qmkdir -p $@
 
-obj/%.o : %.c | dirs
+obj/%.o : %.c | dirs   
+	@echo " srcs dir $(SRCS)"
 	@echo "[CC]      $(notdir $<)"
 	$Q$(CC) $(CFLAGS) -c -o $@ $< -MMD -MF dep/$(*F).d
 
@@ -164,6 +178,7 @@ clean:
 	@echo "[RM]      $(TARGET).elf"; rm -f $(TARGET).elf
 	@echo "[RM]      $(TARGET).map"; rm -f $(TARGET).map
 	@echo "[RM]      $(TARGET).lst"; rm -f $(TARGET).lst
+	@echo "[RM]      $(TARGET).hex"; rm -f $(TARGET).hex
 	@echo "[RMDIR]   dep"          ; rm -fr dep
 	@echo "[RMDIR]   obj"          ; rm -fr obj
 

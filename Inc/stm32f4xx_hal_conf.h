@@ -4,7 +4,7 @@
   * @author  MCD Application Team
   * @version V1.2.0
   * @date    26-December-2014
-  * @brief   HAL configuration file
+  * @brief   HAL configuration file.
   ******************************************************************************
   * @attention
   *
@@ -58,14 +58,14 @@
 #define HAL_DAC_MODULE_ENABLED
 #define HAL_DCMI_MODULE_ENABLED
 #define HAL_DMA_MODULE_ENABLED
-/* #define HAL_DMA2D_MODULE_ENABLED */
+#define HAL_DMA2D_MODULE_ENABLED
 #define HAL_ETH_MODULE_ENABLED
 #define HAL_FLASH_MODULE_ENABLED
 #define HAL_NAND_MODULE_ENABLED
 #define HAL_NOR_MODULE_ENABLED
 #define HAL_PCCARD_MODULE_ENABLED
 #define HAL_SRAM_MODULE_ENABLED
-/* #define HAL_SDRAM_MODULE_ENABLED */
+#define HAL_SDRAM_MODULE_ENABLED
 #define HAL_HASH_MODULE_ENABLED
 #define HAL_GPIO_MODULE_ENABLED
 #define HAL_I2C_MODULE_ENABLED
@@ -76,7 +76,7 @@
 #define HAL_RCC_MODULE_ENABLED
 #define HAL_RNG_MODULE_ENABLED
 #define HAL_RTC_MODULE_ENABLED
-/* #define HAL_SAI_MODULE_ENABLED */
+#define HAL_SAI_MODULE_ENABLED
 #define HAL_SD_MODULE_ENABLED
 #define HAL_SPI_MODULE_ENABLED
 #define HAL_TIM_MODULE_ENABLED
@@ -97,7 +97,7 @@
   *        (when HSE is used as system clock source, directly or through the PLL).  
   */
 #if !defined  (HSE_VALUE) 
-  #define HSE_VALUE    ((uint32_t)8000000) /*!< Value of the External oscillator in Hz */
+  #define HSE_VALUE    ((uint32_t)25000000) /*!< Value of the External oscillator in Hz */
 #endif /* HSE_VALUE */
 
 #if !defined  (HSE_STARTUP_TIMEOUT)
@@ -147,8 +147,7 @@
 #define  VDD_VALUE                    ((uint32_t)3300) /*!< Value of VDD in mv */
 #define  TICK_INT_PRIORITY            ((uint32_t)0x0F) /*!< tick interrupt priority */
 #define  USE_RTOS                     0
-#define  PREFETCH_ENABLE              0 /* The prefetch will be enabled in SystemClock_Config(), depending on the used 
-                                           STM32F405/415/07/417 device: RevA (prefetch must be off) or RevZ (prefetch can be on/off) */
+#define  PREFETCH_ENABLE              1
 #define  INSTRUCTION_CACHE_ENABLE     1
 #define  DATA_CACHE_ENABLE            1
 
@@ -395,7 +394,13 @@
   #define assert_param(expr) ((void)0)
 #endif /* USE_FULL_ASSERT */    
     
+/**
+  * @}
+  */ 
 
+/**
+  * @}
+  */
 
 #ifdef __cplusplus
 }
