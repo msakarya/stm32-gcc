@@ -1,10 +1,10 @@
 /**
   ******************************************************************************
-  * @file    LwIP/LwIP_HTTP_Server_Socket_RTOS/Inc/stm32f4xx_it.h 
+  * @file    LwIP/LwIP_HTTP_Server_Socket_RTOS/Inc/httpserver-socket.h
   * @author  MCD Application Team
   * @version V1.2.0
   * @date    26-December-2014
-  * @brief   This file contains the headers of the interrupt handlers.    
+  * @brief   header file for httpserver-socket.c
   ******************************************************************************
   * @attention
   *
@@ -26,33 +26,17 @@
   */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __STM32F4xx_IT_H
-#define __STM32F4xx_IT_H
-
-#ifdef __cplusplus
- extern "C" {
-#endif 
+#ifndef __HTTPSERVER_SOCKET_H__
+#define __HTTPSERVER_SOCKET_H__
 
 /* Includes ------------------------------------------------------------------*/
-#include "stm32f4xx.h"
-
 /* Exported types ------------------------------------------------------------*/
 /* Exported constants --------------------------------------------------------*/
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */
+void http_server_socket_init(void);
+void DynWebPage(int conn);
 
-void NMI_Handler(void);
-void HardFault_Handler(void);
-void MemManage_Handler(void);
-void BusFault_Handler(void);
-void UsageFault_Handler(void);
-void DebugMon_Handler(void);
-void SysTick_Handler(void);
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif /* __STM32F4xx_IT_H */
+#endif /* __HTTPSERVER_SOCKET_H__ */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

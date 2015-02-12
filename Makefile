@@ -10,7 +10,7 @@
 TARGET     = demo
 
 # Take a look into $(CUBE_DIR)/Drivers/BSP for available BSPs
-Board     = STM324x9I_EVAL
+BOARD     = STM324x9I_EVAL
 #BOARD      = STM32F4-Discovery
 #BOARD     = STM32303C_EVAL
 #BOARD     = STM32303E_EVAL
@@ -31,15 +31,17 @@ EXAMPLE    = Examples/GPIO/GPIO_IOToggle
 # MCU family and type in various capitalizations o_O
 MCU_FAMILY = stm32f4xx
 MCU_LC     = stm32f429xx
-MCU_LS     = D:/polaris_mustafa/ic_dokumanlar/st/STM32Cube_FW_F4_V1.4.0/Projects/STM324x9I_EVAL/stm32-gcc/STM32F429NI_FLASH
+MCU_LS     = STM32F429NI_FLASH
 MCU_MC     = STM32F429xx
 MCU_UC     = STM32F429XX
 
 # Your C files from the /src directory
-SRCS       = main.c 
+SRCS    = stm32f4xx_it.c syscalls.c system_stm32f4xx.c
+SRCS     += app_ethernet.c ethernetif.c fs.c httpserver-socket.c main.c
+#SRCS       = main.c 
 #SRCS      += stm32f4xx_hal_msp.c
-SRCS      += system_$(MCU_FAMILY).c
-SRCS      += stm32f4xx_it.c
+#SRCS      += system_$(MCU_FAMILY).c
+#SRCS      += stm32f4xx_it.c
 
 #SRCS      += stm32f4xx_hal_rcc.c
 #SRCS      += stm32f4xx_hal_rcc_ex.c
@@ -58,6 +60,8 @@ BSP_DIR    = $(CUBE_DIR)/Drivers/BSP/$(BOARD)
 HAL_DIR    = $(CUBE_DIR)/Drivers/STM32F4xx_HAL_Driver
 CMSIS_DIR  = $(CUBE_DIR)/Drivers/CMSIS
 DEV_DIR    = $(CMSIS_DIR)/Device/ST/STM32F4xx
+RTOS_DIR   = $(CUBE_DIR)/Middlewares/Third_Party/FreeRTOS
+LWIP_DIR   = $(CUBE_DIR)/Middlewares/Third_Party/LwIP
 
 # location of OpenOCD Board .cfg files (only used with 'make program')
 OCD_DIR    = /usr/share/openocd/scripts/board
@@ -90,6 +94,59 @@ INCS      += -I $(BSP_DIR)
 INCS      += -I $(CMSIS_DIR)/Include
 INCS      += -I $(DEV_DIR)/Include
 INCS      += -I $(HAL_DIR)/Inc
+INCS      += -I $(LWIP_DIR)/src/include/ipv4
+INCS      += -I $(LWIP_DIR)/src/include/lwip
+INCS      += -I $(LWIP_DIR)/src/include
+INCS      += -I $(LWIP_DIR)/system
+INCS      += -I $(LWIP_DIR)/system/OS
+INCS      += -I $(CUBE_DIR)/Utilities/Log
+INCS      += -I $(CUBE_DIR)/Utilities
+INCS      += -I $(RTOS_DIR)/Source/include
+INCS      += -I $(RTOS_DIR)/Source/CMSIS_RTOS
+INCS      += -I $(RTOS_DIR)/Source/portable/GCC/ARM_CM4F
+INCS      += -I $(CUBE_DIR)/Drivers/BSP/STM32F429I-Discovery
+INCS      += -I $(CUBE_DIR)/Drivers/BSP/Components/stmpe811
+INCS      += -I $(CUBE_DIR)/Drivers/BSP/Components/stmpe1600
+INCS      += -I $(CUBE_DIR)/Drivers/BSP/Components/Common
+INCS      += -I $(CUBE_DIR)/Drivers/BSP/Components
+# Source search paths
+VPATH      = ./Src
+VPATH     += $(HAL_DIR)/Src
+VPATH     += $(DEV_DIR)/Source
+VPATH    +=  $(LWIP_DIR)/src/core/ipv4
+VPATH    +=  $(LWIP_DIR)/src/core
+VPATH    +=  $(LWIP_DIR)/src/core/snmp
+VPATH    +=  $(LWIP_DIR)/src/netif
+VPATH    +=  $(LWIP_DIR)/src/api
+VPATH    +=  $(LWIP_DIR)/system/OS
+
+VPATH    +=  $(RTOS_DIR)/Source
+VPATH    +=  $(RTOS_DIR)/Source/portable/GCC/ARM_CM4F
+VPATH    +=  $(RTOS_DIR)/Source/portable/MemMang
+VPATH    +=  $(RTOS_DIR)/Source/CMSIS_RTOS
+
+VPATH    +=  $(CUBE_DIR)/Utilities/Log
+VPATH    +=  $(BSP_DIR)
+VPATH    +=  $(CUBE_DIR)/Drivers/BSP/Components/stmpe811
+VPATH    +=  $(CUBE_DIR)/Drivers/BSP/Components/stmpe1600
+
+#SRCS += $(foreach sdir,./Src,$(notdir  $(wildcard $(sdir)/*.c)))  # */
+SRCS += $(foreach sdir,$(HAL_DIR)/Src,$(notdir  $(wildcard $(sdir)/*.c)))  # */
+SRCS += $(foreach sdir,$(LWIP_DIR)/src/core/ipv4,$(notdir  $(wildcard $(sdir)/*.c)))  # */
+SRCS += $(foreach sdir,$(LWIP_DIR)/src/core/snmp,$(notdir  $(wildcard $(sdir)/*.c)))  # */
+SRCS += $(foreach sdir,$(LWIP_DIR)/src/netif,$(notdir  $(wildcard $(sdir)/*.c)))  # */
+SRCS += $(foreach sdir,$(LWIP_DIR)/src/api,$(notdir  $(wildcard $(sdir)/*.c)))  # */
+SRCS += $(foreach sdir,$(LWIP_DIR)/src/core,$(notdir  $(wildcard $(sdir)/*.c)))  # */
+SRCS += $(foreach sdir,$(RTOS_DIR)/Source,$(notdir  $(wildcard $(sdir)/*.c)))  # */
+SRCS += $(foreach sdir,$(RTOS_DIR)/Source/CMSIS_RTOS,$(notdir  $(wildcard $(sdir)/*.c)))  # */
+SRCS += $(foreach sdir,$(CUBE_DIR)/Utilities/Log,$(notdir  $(wildcard $(sdir)/*.c)))  # */
+#SRCS += $(foreach sdir,$(BSP_DIR),$(notdir  $(wildcard $(sdir)/*.c)))  # */
+SRCS += $(foreach sdir,$(RTOS_DIR)/Source/portable/GCC/ARM_CM4F,$(notdir  $(wildcard $(sdir)/*.c)))  # */
+SRCS += $(foreach sdir,$(LWIP_DIR)/system/OS,$(notdir  $(wildcard $(sdir)/*.c)))  # */
+SRCS += $(foreach sdir,$(CUBE_DIR)/Drivers/BSP/Components/stmpe811,$(notdir  $(wildcard $(sdir)/*.c)))  # */
+SRCS += $(foreach sdir,$(CUBE_DIR)/Drivers/BSP/Components/stmpe1600,$(notdir  $(wildcard $(sdir)/*.c)))  # */
+SRCS += stm324x9i_eval.c stm324x9i_eval_io.c stm324x9i_eval_lcd.c stm324x9i_eval_sdram.c heap_4.c
+#SRCS3 = $(foreach dirlist,$(VPATH1), $(foreach sdir,$(dirlist),$(notdir  $(wildcard $(sdir)/*.c)))  )  # */
 
 # Library search paths
 LIBS       = -L $(CMSIS_DIR)/Lib
@@ -103,19 +160,6 @@ CFLAGS    += $(INCS) $(DEFS)
 
 # Linker flags
 LDFLAGS    = -Wl,--gc-sections -Wl,-Map=$(TARGET).map $(LIBS) -T $(MCU_LS).ld
-
-# Source search paths
-VPATH      = ./Src
-VPATH     += $(HAL_DIR)/Src
-VPATH     += $(DEV_DIR)/Source/
-
-#SRCS      += $(HAL_DIR)/Src/%.c
-#SRCS      += $(DEV_DIR)/Source/%.c
-
-SRCS2 = $(foreach sdir,$(HAL_DIR)/Src,$(notdir  $(wildcard $(sdir)/*.c)))  # */
-#SRCS3 = $(foreach sdir,$(DEV_DIR)/Source,$(notdir  $(wildcard $(sdir)/*.c)))  # */
-SRCS     += $(SRCS2) 
-
 
 
 #$(notdir src/foo.c hacks)
@@ -143,8 +187,7 @@ dep obj Src:
 	@echo "[MKDIR]   $@"
 	$Qmkdir -p $@
 
-obj/%.o : %.c | dirs   
-	@echo " srcs dir $(SRCS)"
+obj/%.o : %.c | dirs 	
 	@echo "[CC]      $(notdir $<)"
 	$Q$(CC) $(CFLAGS) -c -o $@ $< -MMD -MF dep/$(*F).d
 
