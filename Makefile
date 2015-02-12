@@ -10,7 +10,7 @@
 TARGET     = demo
 
 # Take a look into $(CUBE_DIR)/Drivers/BSP for available BSPs
-BOARD     = STM324x9I_EVAL
+BOARD     = STM32F429I-Discovery
 #BOARD      = STM32F4-Discovery
 #BOARD     = STM32303C_EVAL
 #BOARD     = STM32303E_EVAL

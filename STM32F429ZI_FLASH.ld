@@ -3,7 +3,7 @@
 **
 **  File        : stm32_flash.ld
 **
-**  Abstract    : Linker script for STM32F429NI Device with
+**  Abstract    : Linker script for STM32F429ZI Device with
 **                2048KByte FLASH, 192KByte RAM
 **
 **                Set heap size, stack size and stack location according
