@@ -35,15 +35,15 @@ MCU_MC     = STM32F407xx
 MCU_UC     = STM32F407XX
 
 # Your C files from the /src directory
-SRCS       = main.c stm32f4xx_hal_msp.c stm32f4xx_it.c system_stm32f4xx.c
+SRCS       = main.c  stm32f4xx_it.c syscalls.c
 SRCS      += system_$(MCU_FAMILY).c
 SRCS      += stm32f4xx_it.c
-
-SRCS      += stm32f4xx_hal_rcc.c
-SRCS      += stm32f4xx_hal_rcc_ex.c
-SRCS      += stm32f4xx_hal.c
-SRCS      += stm32f4xx_hal_cortex.c
-SRCS      += stm32f4xx_hal_gpio.c
+#stm32f4xx_hal_msp.c system_stm32f4xx.c
+#SRCS      += stm32f4xx_hal_rcc.c
+#SRCS      += stm32f4xx_hal_rcc_ex.c
+#SRCS      += stm32f4xx_hal.c
+#SRCS      += stm32f4xx_hal_cortex.c
+#SRCS      += stm32f4xx_hal_gpio.c
 
 CUBE_URL   = http://www.st.com/st-web-ui/static/active/en/st_prod_software_internet/resource/technical/software/firmware/stm32cubef3.zip
 ifeq ($(OS),Windows_NT)
@@ -56,6 +56,7 @@ BSP_DIR    = $(CUBE_DIR)/Drivers/BSP/$(BOARD)
 HAL_DIR    = $(CUBE_DIR)/Drivers/STM32F4xx_HAL_Driver
 CMSIS_DIR  = $(CUBE_DIR)/Drivers/CMSIS
 DEV_DIR    = $(CMSIS_DIR)/Device/ST/STM32F4xx
+RTOS_DIR   = $(CUBE_DIR)/Middlewares/Third_Party/FreeRTOS
 
 # location of OpenOCD Board .cfg files (only used with 'make program')
 OCD_DIR    = /usr/share/openocd/scripts/board
@@ -88,7 +89,25 @@ INCS      += -I $(BSP_DIR)
 INCS      += -I $(CMSIS_DIR)/Include
 INCS      += -I $(DEV_DIR)/Include
 INCS      += -I $(HAL_DIR)/Inc
+INCS      += -I $(RTOS_DIR)/Source/include
+INCS      += -I $(RTOS_DIR)/Source/CMSIS_RTOS
+INCS      += -I $(RTOS_DIR)/Source/portable/GCC/ARM_CM4F
 
+# Source search paths
+VPATH      = ./Src
+VPATH     += $(HAL_DIR)/Src
+VPATH     += $(DEV_DIR)/Source/
+VPATH    +=  $(RTOS_DIR)/Source
+VPATH    +=  $(RTOS_DIR)/Source/portable/GCC/ARM_CM4F
+VPATH    +=  $(RTOS_DIR)/Source/portable/MemMang
+VPATH    +=  $(RTOS_DIR)/Source/CMSIS_RTOS
+VPATH    +=  $(BSP_DIR)
+
+SRCS += $(foreach sdir,$(HAL_DIR)/Src,$(notdir  $(wildcard $(sdir)/*.c)))  # */
+SRCS += $(foreach sdir,$(RTOS_DIR)/Source,$(notdir  $(wildcard $(sdir)/*.c)))  # */
+SRCS += $(foreach sdir,$(RTOS_DIR)/Source/CMSIS_RTOS,$(notdir  $(wildcard $(sdir)/*.c)))  # */
+SRCS += $(foreach sdir,$(RTOS_DIR)/Source/portable/GCC/ARM_CM4F,$(notdir  $(wildcard $(sdir)/*.c)))  # */
+SRCS +=  heap_4.c
 # Library search paths
 LIBS       = -L $(CMSIS_DIR)/Lib
 
@@ -102,10 +121,6 @@ CFLAGS    += $(INCS) $(DEFS)
 # Linker flags
 LDFLAGS    = -Wl,--gc-sections -Wl,-Map=$(TARGET).map $(LIBS) -T $(MCU_LS).ld
 
-# Source search paths
-VPATH      = ./Src
-VPATH     += $(HAL_DIR)/Src
-VPATH     += $(DEV_DIR)/Source/
 
 OBJS       = $(addprefix obj/,$(SRCS:.c=.o))
 DEPS       = $(addprefix dep/,$(SRCS:.c=.d))
@@ -164,6 +179,7 @@ clean:
 	@echo "[RM]      $(TARGET).elf"; rm -f $(TARGET).elf
 	@echo "[RM]      $(TARGET).map"; rm -f $(TARGET).map
 	@echo "[RM]      $(TARGET).lst"; rm -f $(TARGET).lst
+	@echo "[RM]      $(TARGET).hex"; rm -f $(TARGET).hex
 	@echo "[RMDIR]   dep"          ; rm -fr dep
 	@echo "[RMDIR]   obj"          ; rm -fr obj
 
