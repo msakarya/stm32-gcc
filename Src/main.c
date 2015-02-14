@@ -1,43 +1,6 @@
-/**
-  ******************************************************************************
-  * @file    Templates/Src/main.c 
-  * @author  MCD Application Team
-  * @version V1.2.0
-  * @date    26-December-2014
-  * @brief   Main program body
-  ******************************************************************************
-  * @attention
-  *
-  * <h2><center>&copy; COPYRIGHT(c) 2014 STMicroelectronics</center></h2>
-  *
-  * Redistribution and use in source and binary forms, with or without modification,
-  * are permitted provided that the following conditions are met:
-  *   1. Redistributions of source code must retain the above copyright notice,
-  *      this list of conditions and the following disclaimer.
-  *   2. Redistributions in binary form must reproduce the above copyright notice,
-  *      this list of conditions and the following disclaimer in the documentation
-  *      and/or other materials provided with the distribution.
-  *   3. Neither the name of STMicroelectronics nor the names of its contributors
-  *      may be used to endorse or promote products derived from this software
-  *      without specific prior written permission.
-  *
-  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-  * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
-  * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-  * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-  * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-  * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-  *
-  ******************************************************************************
-  */
-
-/* Includes ------------------------------------------------------------------*/
+/*------------------------------------------------------------------*/
 #include "main.h"
-
+#include "cmsis_os.h"
 /** @addtogroup STM32F4xx_HAL_Examples
   * @{
   */
@@ -50,7 +13,10 @@
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
+osThreadId LEDThread1Handle, LEDThread2Handle;
 /* Private function prototypes -----------------------------------------------*/
+static void LED_Thread1(void const *argument);
+static void LED_Thread2(void const *argument);
 static void SystemClock_Config(void);
 static void Error_Handler(void);
 
@@ -73,13 +39,27 @@ int main(void)
        - Low Level Initialization
      */
   HAL_Init();
-
+/* Configure LED3 and LED4 */
+  BSP_LED_Init(LED3);
+  BSP_LED_Init(LED4);
   /* Configure the system clock to 168 MHz */
   SystemClock_Config();
 
 
-  /* Add your application code here
-     */
+  /* Thread 1 definition */
+  osThreadDef(LED3, LED_Thread1, osPriorityNormal, 0, configMINIMAL_STACK_SIZE);
+  
+  /* Thread 2 definition */
+  osThreadDef(LED4, LED_Thread2, osPriorityNormal, 0, configMINIMAL_STACK_SIZE);
+  
+  /* Start thread 1 */
+  LEDThread1Handle = osThreadCreate (osThread(LED3), NULL);
+  
+  /* Start thread 2 */
+  LEDThread2Handle = osThreadCreate (osThread(LED4), NULL);
+  
+  /* Start scheduler */
+  osKernelStart();
 
 
   /* Infinite loop */
@@ -108,6 +88,81 @@ int main(void)
   * @param  None
   * @retval None
   */
+/**
+  * @brief  Toggle LED3 and LED4 thread
+  * @param  thread not used
+  * @retval None
+  */
+static void LED_Thread1(void const *argument)
+{
+  uint32_t count = 0;
+  (void) argument;
+  
+  for(;;)
+  {
+    count = osKernelSysTick() + 5000;
+    
+    /* Toggle LED3 every 200 ms for 5 s */
+    while (count >= osKernelSysTick())
+    {
+      BSP_LED_Toggle(LED3);
+      
+      osDelay(200);
+    }
+    
+    /* Turn off LED3 */
+    BSP_LED_Off(LED3);
+    
+    /* Suspend Thread 1 */
+    osThreadSuspend(NULL);
+    
+    count = osKernelSysTick() + 5000;
+    
+    /* Toggle LED3 every 400 ms for 5 s */
+    while (count >= osKernelSysTick())
+    {
+      BSP_LED_Toggle(LED3);
+      
+      osDelay(400);
+    }
+    
+    /* Resume Thread 2 */
+    osThreadResume(LEDThread2Handle);
+  }
+}
+
+/**
+  * @brief  Toggle LED4 thread
+  * @param  argument not used
+  * @retval None
+  */
+static void LED_Thread2(void const *argument)
+{
+  uint32_t count;
+  (void) argument;
+  
+  for(;;)
+  {
+    count = osKernelSysTick() + 10000;
+    
+    /* Toggle LED4 every 500 ms for 10 s */
+    while (count >= osKernelSysTick())
+    {
+      BSP_LED_Toggle(LED4);
+
+      osDelay(500);
+    }
+    
+    /* Turn off LED4 */
+    BSP_LED_Off(LED4);
+    
+    /* Resume Thread 1 */
+    osThreadResume(LEDThread1Handle);
+    
+    /* Suspend Thread 2 */
+    osThreadSuspend(NULL);  
+  }
+}
 static void SystemClock_Config(void)
 {
   RCC_ClkInitTypeDef RCC_ClkInitStruct;

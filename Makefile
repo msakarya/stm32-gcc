@@ -35,7 +35,7 @@ MCU_MC     = STM32F407xx
 MCU_UC     = STM32F407XX
 
 # Your C files from the /src directory
-SRCS       = main.c  stm32f4xx_it.c syscalls.c
+SRCS       = main.c  stm32f4xx_it.c #syscalls.c
 SRCS      += system_$(MCU_FAMILY).c
 SRCS      += stm32f4xx_it.c
 #stm32f4xx_hal_msp.c system_stm32f4xx.c
@@ -107,6 +107,7 @@ SRCS += $(foreach sdir,$(HAL_DIR)/Src,$(notdir  $(wildcard $(sdir)/*.c)))  # */
 SRCS += $(foreach sdir,$(RTOS_DIR)/Source,$(notdir  $(wildcard $(sdir)/*.c)))  # */
 SRCS += $(foreach sdir,$(RTOS_DIR)/Source/CMSIS_RTOS,$(notdir  $(wildcard $(sdir)/*.c)))  # */
 SRCS += $(foreach sdir,$(RTOS_DIR)/Source/portable/GCC/ARM_CM4F,$(notdir  $(wildcard $(sdir)/*.c)))  # */
+SRCS += $(foreach sdir,$(BSP_DIR),$(notdir  $(wildcard $(sdir)/*.c)))  # */
 SRCS +=  heap_4.c
 # Library search paths
 LIBS       = -L $(CMSIS_DIR)/Lib
