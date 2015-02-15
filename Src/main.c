@@ -13,10 +13,11 @@
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
-osThreadId LEDThread1Handle, LEDThread2Handle;
+osThreadId LEDThread1Handle, LEDThread2Handle, LEDThread3Handle;
 /* Private function prototypes -----------------------------------------------*/
 static void LED_Thread1(void const *argument);
 static void LED_Thread2(void const *argument);
+static void LED_Thread3(void const *argument);
 static void SystemClock_Config(void);
 static void Error_Handler(void);
 
@@ -26,6 +27,8 @@ static void Error_Handler(void);
   * @param  None
   * @retval None
   */
+int mcnt=0;
+
 int main(void)
 {
 
@@ -51,20 +54,25 @@ int main(void)
   
   /* Thread 2 definition */
   osThreadDef(LED4, LED_Thread2, osPriorityNormal, 0, configMINIMAL_STACK_SIZE);
-  
+  //osThreadDef(LED3, LED_Thread3, osPriorityNormal, 0, configMINIMAL_STACK_SIZE);
   /* Start thread 1 */
   LEDThread1Handle = osThreadCreate (osThread(LED3), NULL);
   
   /* Start thread 2 */
   LEDThread2Handle = osThreadCreate (osThread(LED4), NULL);
+//LEDThread3Handle = osThreadCreate (osThread(LED3), NULL);
   
   /* Start scheduler */
   osKernelStart();
 
-
   /* Infinite loop */
   while (1)
   {
+long int i=0;
+//BSP_LED_Toggle(LED3);
+mcnt++;
+HAL_Delay(1000);
+
   }
 }
 
@@ -93,6 +101,22 @@ int main(void)
   * @param  thread not used
   * @retval None
   */
+static void LED_Thread3(void const *argument)
+{
+  uint32_t count = 0;
+  (void) argument;
+  
+  for(;;)
+  {
+ osStatus status;   
+BSP_LED_Toggle(LED3);
+status = osDelay(500);
+//vTaskDelay(500);
+//HAL_Delay(500);
+  }
+
+}
+
 static void LED_Thread1(void const *argument)
 {
   uint32_t count = 0;
@@ -101,13 +125,13 @@ static void LED_Thread1(void const *argument)
   for(;;)
   {
     count = osKernelSysTick() + 5000;
-    
+    mcnt=count;
     /* Toggle LED3 every 200 ms for 5 s */
     while (count >= osKernelSysTick())
     {
       BSP_LED_Toggle(LED3);
-      
-      osDelay(200);
+      mcnt = osKernelSysTick();
+      //osDelay(200);
     }
     
     /* Turn off LED3 */

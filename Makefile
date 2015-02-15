@@ -160,14 +160,15 @@ $(TARGET).elf: $(OBJS)
 	@echo "[SIZE]    $(TARGET).elf"
 	$(SIZE) $(TARGET).elf
 	arm-none-eabi-objcopy -Oihex $(TARGET).elf $(TARGET).hex
-
+pr: all
+	openocd -f interface/stlink-v2.cfg -c "set WORKAREASIZE 0x2000" -f target/stm32f4x_stlink.cfg -c "program demo.elf verify reset"
 program: all
 	$(OCD) -c "program $(TARGET).elf verify reset" $(OCDFLAGS)
 
 debug:
-	$(GDB)  -ex "target remote | openocd $(OCDFLAGS) -c 'gdb_port pipe'" \
+	$(GDB) $(TARGET).elf -ex "target remote | openocd $(OCDFLAGS) -c 'gdb_port pipe'" \
 		-ex "monitor reset halt" \
-		-ex "load" $(GDBFLAGS) $(TARGET).elf
+		-ex "load" $(GDBFLAGS) 
 
 
 template: Src
