@@ -156,7 +156,8 @@ void DebugMon_Handler(void)
   */
 void SysTick_Handler(void)
 {
-  HAL_IncTick();
+  //HAL_IncTick(); 
+  osSystickHandler();
 }
 
 /******************************************************************************/

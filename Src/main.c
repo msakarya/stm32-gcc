@@ -50,17 +50,17 @@ int main(void)
 
 
   /* Thread 1 definition */
-  osThreadDef(LED3, LED_Thread1, osPriorityNormal, 0, configMINIMAL_STACK_SIZE);
+  //osThreadDef(LED3, LED_Thread1, osPriorityNormal, 0, configMINIMAL_STACK_SIZE);
   
   /* Thread 2 definition */
-  osThreadDef(LED4, LED_Thread2, osPriorityNormal, 0, configMINIMAL_STACK_SIZE);
-  //osThreadDef(LED3, LED_Thread3, osPriorityNormal, 0, configMINIMAL_STACK_SIZE);
+  //osThreadDef(LED4, LED_Thread2, osPriorityNormal, 0, configMINIMAL_STACK_SIZE);
+  osThreadDef(LED3, LED_Thread3, osPriorityNormal, 0, configMINIMAL_STACK_SIZE);
   /* Start thread 1 */
-  LEDThread1Handle = osThreadCreate (osThread(LED3), NULL);
+  //LEDThread1Handle = osThreadCreate (osThread(LED3), NULL);
   
   /* Start thread 2 */
-  LEDThread2Handle = osThreadCreate (osThread(LED4), NULL);
-//LEDThread3Handle = osThreadCreate (osThread(LED3), NULL);
+  //LEDThread2Handle = osThreadCreate (osThread(LED4), NULL);
+LEDThread3Handle = osThreadCreate (osThread(LED3), NULL);
   
   /* Start scheduler */
   osKernelStart();
