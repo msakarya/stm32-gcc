@@ -14,10 +14,12 @@
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 osThreadId LEDThread1Handle, LEDThread2Handle, LEDThread3Handle;
+osThreadId MathThread1Handle;
 /* Private function prototypes -----------------------------------------------*/
 static void LED_Thread1(void const *argument);
 static void LED_Thread2(void const *argument);
 static void LED_Thread3(void const *argument);
+static void Math_Thread1(void const *argument);
 static void SystemClock_Config(void);
 static void Error_Handler(void);
 
@@ -55,12 +57,14 @@ int main(void)
   /* Thread 2 definition */
   //osThreadDef(LED4, LED_Thread2, osPriorityNormal, 0, configMINIMAL_STACK_SIZE);
   osThreadDef(LED3, LED_Thread3, osPriorityNormal, 0, configMINIMAL_STACK_SIZE);
+  osThreadDef(NULL, Math_Thread1, osPriorityLow, 0, configMINIMAL_STACK_SIZE);
   /* Start thread 1 */
   //LEDThread1Handle = osThreadCreate (osThread(LED3), NULL);
   
   /* Start thread 2 */
   //LEDThread2Handle = osThreadCreate (osThread(LED4), NULL);
 LEDThread3Handle = osThreadCreate (osThread(LED3), NULL);
+MathThread1Handle = osThreadCreate (osThread(NULL), NULL);
   
   /* Start scheduler */
   osKernelStart();
@@ -76,26 +80,7 @@ HAL_Delay(1000);
   }
 }
 
-/**
-  * @brief  System Clock Configuration
-  *         The system Clock is configured as follow : 
-  *            System Clock source            = PLL (HSE)
-  *            SYSCLK(Hz)                     = 168000000
-  *            HCLK(Hz)                       = 168000000
-  *            AHB Prescaler                  = 1
-  *            APB1 Prescaler                 = 4
-  *            APB2 Prescaler                 = 2
-  *            HSE Frequency(Hz)              = 8000000
-  *            PLL_M                          = 8
-  *            PLL_N                          = 336
-  *            PLL_P                          = 2
-  *            PLL_Q                          = 7
-  *            VDD(V)                         = 3.3
-  *            Main regulator output voltage  = Scale1 mode
-  *            Flash Latency(WS)              = 5
-  * @param  None
-  * @retval None
-  */
+
 /**
   * @brief  Toggle LED3 and LED4 thread
   * @param  thread not used
@@ -105,14 +90,41 @@ static void LED_Thread3(void const *argument)
 {
   uint32_t count = 0;
   (void) argument;
+    uint8_t hb_cnt=7; // Heart Beat Counter
   
   for(;;)
   {
- osStatus status;   
-BSP_LED_Toggle(LED3);
-status = osDelay(500);
-//vTaskDelay(500);
-//HAL_Delay(500);
+    osStatus status;   
+    //BSP_LED_Toggle(LED3);
+    status = osDelay(125);
+
+    hb_cnt = hb_cnt==7 ? 0: hb_cnt+1;
+
+    if ((hb_cnt==0)|(hb_cnt==2)){
+        BSP_LED_On(LED3);
+    }else{
+        BSP_LED_Off(LED3);
+    }    
+    
+  }
+
+}
+/**
+  * @brief  Toggle LED3 and LED4 thread
+  * @param  thread not used
+  * @retval None
+  */
+static void Math_Thread1(void const *argument)
+{
+  uint32_t count = 0;
+  (void) argument;
+   
+  for(;;)
+  {
+    osStatus status;   
+    BSP_LED_Toggle(LED4);
+    status = osDelay(500);      
+    
   }
 
 }
@@ -187,6 +199,26 @@ static void LED_Thread2(void const *argument)
     osThreadSuspend(NULL);  
   }
 }
+/**
+  * @brief  System Clock Configuration
+  *         The system Clock is configured as follow : 
+  *            System Clock source            = PLL (HSE)
+  *            SYSCLK(Hz)                     = 168000000
+  *            HCLK(Hz)                       = 168000000
+  *            AHB Prescaler                  = 1
+  *            APB1 Prescaler                 = 4
+  *            APB2 Prescaler                 = 2
+  *            HSE Frequency(Hz)              = 8000000
+  *            PLL_M                          = 8
+  *            PLL_N                          = 336
+  *            PLL_P                          = 2
+  *            PLL_Q                          = 7
+  *            VDD(V)                         = 3.3
+  *            Main regulator output voltage  = Scale1 mode
+  *            Flash Latency(WS)              = 5
+  * @param  None
+  * @retval None
+  */
 static void SystemClock_Config(void)
 {
   RCC_ClkInitTypeDef RCC_ClkInitStruct;
