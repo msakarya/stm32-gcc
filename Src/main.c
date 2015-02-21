@@ -14,12 +14,23 @@
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 osThreadId LEDThread1Handle, LEDThread2Handle, LEDThread3Handle;
-osThreadId MathThread1Handle;
+osThreadId MathThread1Handle,UxThread1Handle;
+
+/* UART handler declaration */
+UART_HandleTypeDef UartHandle;
+__IO ITStatus UartReady = RESET;
+
+/* Buffer used for transmission */
+uint8_t aTxBuffer[] = " ****UART_TwoBoards communication based on DMA****  ****UART_TwoBoards communication based on DMA****  ****UART_TwoBoards communication based on DMA**** ";
+
+/* Buffer used for reception */
+uint8_t aRxBuffer[RXBUFFERSIZE];
 /* Private function prototypes -----------------------------------------------*/
 static void LED_Thread1(void const *argument);
 static void LED_Thread2(void const *argument);
 static void LED_Thread3(void const *argument);
 static void Math_Thread1(void const *argument);
+static void Ux_Thread1(void const *argument);
 static void SystemClock_Config(void);
 static void Error_Handler(void);
 
@@ -50,6 +61,43 @@ int main(void)
   /* Configure the system clock to 168 MHz */
   SystemClock_Config();
 
+ /*##-1- Configure the UART peripheral ######################################*/
+  /* Put the USART peripheral in the Asynchronous mode (UART Mode) */
+  /* UART1 configured as follow:
+      - Word Length = 8 Bits
+      - Stop Bit = One Stop bit
+      - Parity = None
+      - BaudRate = 9600 baud
+      - Hardware flow control disabled (RTS and CTS signals) */
+  UartHandle.Instance          = USARTx;
+  
+  UartHandle.Init.BaudRate     = 115200;
+  UartHandle.Init.WordLength   = UART_WORDLENGTH_8B;
+  UartHandle.Init.StopBits     = UART_STOPBITS_1;
+  UartHandle.Init.Parity       = UART_PARITY_NONE;
+  UartHandle.Init.HwFlowCtl    = UART_HWCONTROL_NONE;
+  UartHandle.Init.Mode         = UART_MODE_TX_RX;
+  UartHandle.Init.OverSampling = UART_OVERSAMPLING_16;
+
+ if(HAL_UART_Init(&UartHandle) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+
+/* The board sends the message and expects to receive it back */
+  
+  
+  
+  /*##-3- Wait for the end of the transfer ###################################*/  
+ // while (UartReady != SET)
+ // {
+ // }
+  
+  /* Reset transmission flag */
+ // UartReady = RESET;
+  
+ 
 
   /* Thread 1 definition */
   //osThreadDef(LED3, LED_Thread1, osPriorityNormal, 0, configMINIMAL_STACK_SIZE);
@@ -57,14 +105,16 @@ int main(void)
   /* Thread 2 definition */
   //osThreadDef(LED4, LED_Thread2, osPriorityNormal, 0, configMINIMAL_STACK_SIZE);
   osThreadDef(LED3, LED_Thread3, osPriorityNormal, 0, configMINIMAL_STACK_SIZE);
-  osThreadDef(NULL, Math_Thread1, osPriorityLow, 0, configMINIMAL_STACK_SIZE);
+  osThreadDef(math1, Math_Thread1, osPriorityLow, 0, configMINIMAL_STACK_SIZE);
+  osThreadDef(Ux1, Ux_Thread1, osPriorityNormal, 0, configMINIMAL_STACK_SIZE);
   /* Start thread 1 */
   //LEDThread1Handle = osThreadCreate (osThread(LED3), NULL);
   
   /* Start thread 2 */
   //LEDThread2Handle = osThreadCreate (osThread(LED4), NULL);
 LEDThread3Handle = osThreadCreate (osThread(LED3), NULL);
-MathThread1Handle = osThreadCreate (osThread(NULL), NULL);
+MathThread1Handle = osThreadCreate (osThread(math1), NULL);
+UxThread1Handle = osThreadCreate (osThread(Ux1), NULL);
   
   /* Start scheduler */
   osKernelStart();
@@ -114,15 +164,101 @@ static void LED_Thread3(void const *argument)
   * @param  thread not used
   * @retval None
   */
-static void Math_Thread1(void const *argument)
+static void Ux_Thread1(void const *argument)
 {
   uint32_t count = 0;
   (void) argument;
-   
+  uint8_t cnt=0;
   for(;;)
   {
     osStatus status;   
     BSP_LED_Toggle(LED4);
+    status = osDelay(500);   
+    if (cnt == 0) {
+    cnt=1;
+    /*##-2- Start the transmission process #####################################*/  
+  /* While the UART in reception process, user can transmit data through 
+     "aTxBuffer" buffer */
+  if(HAL_UART_Transmit_DMA(&UartHandle, (uint8_t*)aTxBuffer, TXBUFFERSIZE)!= HAL_OK)
+  {
+    Error_Handler();
+  }
+  
+  
+    }else{
+    cnt=0;
+    
+     /*##-4- Put UART peripheral in reception process ###########################*/  
+  if(HAL_UART_Receive_DMA(&UartHandle, (uint8_t *)aRxBuffer, RXBUFFERSIZE) != HAL_OK)
+  {
+    Error_Handler();
+  }
+    
+    
+    }
+    
+  }
+
+}
+/**
+  * @brief  Tx Transfer completed callback
+  * @param  UartHandle: UART handle. 
+  * @note   This example shows a simple way to report end of DMA Tx transfer, and 
+  *         you can add your own implementation. 
+  * @retval None
+  */
+void HAL_UART_TxCpltCallback(UART_HandleTypeDef *UartHandle)
+{
+  /* Set transmission flag: transfer complete */
+  UartReady = SET;
+
+  
+}
+
+/**
+  * @brief  Rx Transfer completed callback
+  * @param  UartHandle: UART handle
+  * @note   This example shows a simple way to report end of DMA Rx transfer, and 
+  *         you can add your own implementation.
+  * @retval None
+  */
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *UartHandle)
+{
+  /* Set transmission flag: transfer complete */
+  UartReady = SET;
+  
+  
+}
+
+/**
+  * @brief  UART error callbacks
+  * @param  UartHandle: UART handle
+  * @note   This example shows a simple way to report transfer error, and you can
+  *         add your own implementation.
+  * @retval None
+  */
+void HAL_UART_ErrorCallback(UART_HandleTypeDef *UartHandle)
+{
+  static volatile uint8_t er=0;
+  er = 1;
+  
+}
+
+
+/**
+  * @brief  Toggle LED3 and LED4 thread
+  * @param  thread not used
+  * @retval None
+  */
+static void Math_Thread1(void const *argument)
+{
+  uint32_t count = 0;
+  (void) argument;
+  
+  for(;;)
+  {
+    osStatus status;   
+    //BSP_LED_Toggle(LED4);
     status = osDelay(500);      
     
   }

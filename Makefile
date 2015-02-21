@@ -35,7 +35,7 @@ MCU_MC     = STM32F407xx
 MCU_UC     = STM32F407XX
 
 # Your C files from the /src directory
-SRCS       = main.c  stm32f4xx_it.c #syscalls.c
+SRCS       = main.c  stm32f4xx_it.c stm32f4xx_hal_msp.c
 SRCS      += system_$(MCU_FAMILY).c
 SRCS      += stm32f4xx_it.c
 #stm32f4xx_hal_msp.c system_stm32f4xx.c
