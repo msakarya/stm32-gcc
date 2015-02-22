@@ -85,6 +85,7 @@ DEFS       = -D $(MCU_MC)
 # Include search paths (-I)
 INCS       = -I Src
 INCS      += -I Inc
+INCS      += -I user
 INCS      += -I $(BSP_DIR)
 INCS      += -I $(CMSIS_DIR)/Include
 INCS      += -I $(DEV_DIR)/Include
@@ -95,6 +96,7 @@ INCS      += -I $(RTOS_DIR)/Source/portable/GCC/ARM_CM4F
 
 # Source search paths
 VPATH      = ./Src
+VPATH     += ./user
 VPATH     += $(HAL_DIR)/Src
 VPATH     += $(DEV_DIR)/Source/
 VPATH    +=  $(RTOS_DIR)/Source
@@ -103,6 +105,7 @@ VPATH    +=  $(RTOS_DIR)/Source/portable/MemMang
 VPATH    +=  $(RTOS_DIR)/Source/CMSIS_RTOS
 VPATH    +=  $(BSP_DIR)
 
+SRCS += $(foreach sdir,./user,$(notdir  $(wildcard $(sdir)/*.c)))  # */
 SRCS += $(foreach sdir,$(HAL_DIR)/Src,$(notdir  $(wildcard $(sdir)/*.c)))  # */
 SRCS += $(foreach sdir,$(RTOS_DIR)/Source,$(notdir  $(wildcard $(sdir)/*.c)))  # */
 SRCS += $(foreach sdir,$(RTOS_DIR)/Source/CMSIS_RTOS,$(notdir  $(wildcard $(sdir)/*.c)))  # */

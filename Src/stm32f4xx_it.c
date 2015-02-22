@@ -39,6 +39,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "user_uart.h"
 #include "stm32f4xx_it.h"
 
 /** @addtogroup STM32F4xx_HAL_Examples
@@ -55,6 +56,7 @@
 /* Private variables ---------------------------------------------------------*/
 /* UART handler declared in "main.c" file */
 extern UART_HandleTypeDef UartHandle;
+extern TIM_HandleTypeDef    TimHandle;
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
 
@@ -196,6 +198,18 @@ void USARTx_IRQHandler(void)
 {
   HAL_UART_IRQHandler(&UartHandle);
 }
+
+/**
+  * @brief  This function handles TIM2 interrupt request.
+  * @param  None
+  * @retval : None
+  */
+  
+void TIM1_CC_IRQHandler(void)
+{
+ HAL_TIM_IRQHandler(&TimHandle); 
+ 
+ }
 
 /**
   * @brief  This function handles PPP interrupt request.

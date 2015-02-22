@@ -48,6 +48,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f4xx_hal.h"
 #include "main.h"
+#include "stm32f4xx_it.h"
 /** @addtogroup STM32F4xx_HAL_Driver
   * @{
   */
@@ -66,7 +67,46 @@
 /** @defgroup HAL_MSP_Private_Functions
   * @{
   */
+/**
+  * @brief TIM MSP Initialization 
+  *        This function configures the hardware resources used in this example: 
+  *           - Peripheral's clock enable
+  *           - Peripheral's GPIO Configuration  
+  * @param htim: TIM handle pointer
+  * @retval None
+  */
+void HAL_TIM_IC_MspInit(TIM_HandleTypeDef *htim)
+{
+  GPIO_InitTypeDef   GPIO_InitStruct;
+ 
+  /*##-1- Enable peripherals and GPIO Clocks #################################*/
+  /* Enable TIM5 clock */
+  __HAL_RCC_TIM1_CLK_ENABLE();   
+    
+  /* Enable GPIOA Clocks */
+  __HAL_RCC_GPIOA_CLK_ENABLE();
+  
+  /* Configure  (TIMx_Channel) in Alternate function, push-pull and 100MHz speed */
+  GPIO_InitStruct.Pin = GPIO_PIN_9;
+  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  GPIO_InitStruct.Speed = GPIO_SPEED_HIGH;
+  GPIO_InitStruct.Alternate = GPIO_AF1_TIM1;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+  
+  GPIO_InitStruct.Pin = GPIO_PIN_1;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Speed = GPIO_SPEED_LOW;  
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
+   /*##-2- Configure the NVIC for TIMx ########################################*/
+  /* Set the TIMx priority */
+  HAL_NVIC_SetPriority(TIM1_CC_IRQn, 0, 1);
+  
+  /* Enable the TIMx global Interrupt */
+  HAL_NVIC_EnableIRQ(TIM1_CC_IRQn);
+}
+  
 /**
   * @brief UART MSP Initialization 
   *        This function configures the hardware resources used in this example: 
@@ -83,6 +123,13 @@ void HAL_UART_MspInit(UART_HandleTypeDef *huart)
   static DMA_HandleTypeDef hdma_rx;
   
   GPIO_InitTypeDef  GPIO_InitStruct;
+  
+   
+    /* GPIOA.1 Configuration: TIM2 Channel2 as input floatinng */
+  GPIO_InitStruct.Pin  = GPIO_PIN_1;
+  //GPIO_InitStruct.Mode = GPIO_Mode_IN_FLOATING ;
+  GPIO_InitStruct.Alternate = GPIO_AF1_TIM2;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
   
   /*##-1- Enable peripherals and GPIO Clocks #################################*/
   /* Enable GPIO TX/RX clock */
@@ -163,7 +210,8 @@ void HAL_UART_MspInit(UART_HandleTypeDef *huart)
   
   /* NVIC configuration for USART TC interrupt */
   HAL_NVIC_SetPriority(USARTx_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(USARTx_IRQn);
+  HAL_NVIC_EnableIRQ(USARTx_IRQn);     
+  
 }
 
 /**
